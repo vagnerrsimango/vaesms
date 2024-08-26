@@ -1,61 +1,93 @@
+"use client";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+// import useLogin from "./useLogin";
+// import FormButton from "@/components/common/FormButton";
+// import { useSession } from "next-auth/react";
+import { redirect } from "next/navigation";
+import { useEffect } from "react";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 
-// pages/login.js
-export default function Login() {
-  return (
-    <div className="flex items-center justify-center min-h-screen bg-gray-100">
-      <div className="w-full max-w-md p-8 space-y-8 bg-white rounded shadow-md">
-        <div className="text-center">
-          <h2 className="mt-6 text-3xl font-extrabold text-gray-900">VAE Broadcast</h2>
-        </div>
-        <form className="mt-8 space-y-6" action="#" method="POST">
-          <input type="hidden" name="remember" value="true" />
-          <div className="rounded-md shadow-sm -space-y-px">
-            <div>
-              <label htmlFor="username" className="sr-only">Username</label>
-              <input
-                id="username"
-                name="username"
-                type="text"
-                required
-                className="relative block w-full px-3 py-2 border border-gray-300 rounded-t-md placeholder-gray-500 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                placeholder="Username"
-              />
-            </div>
-            <div>
-              <label htmlFor="password" className="sr-only">Password</label>
-              <input
-                id="password"
-                name="password"
-                type="password"
-                required
-                className="relative block w-full px-3 py-2 border border-gray-300 rounded-b-md placeholder-gray-500 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                placeholder="Password"
-              />
-            </div>
-          </div>
+export default function AuthPage() {
+  // const { data: session, status } = useSession();
+  const router = useRouter();
 
-          <div>
-            <Link href="/contactmgmt">
-            <button
-              type="submit"
-              className="relative flex justify-center w-full px-4 py-2 text-sm font-medium text-white bg-indigo-600 border border-transparent rounded-md group hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-            >
-              Entrar
-            </button>
-            </Link>
-          </div>
-          <div className="relative flex justify-center w-full py-2 text-sm font-medium text-gray-600 border border-gray-300 rounded-md hover:bg-gray-100 focus:outline-none">
-            <button
-              type="button"
-              className="flex items-center space-x-2"
-          
-            >
-              <span>Entrar com google</span>
-            </button>
-          </div>
-        </form>
-      </div>
-    </div>
-  )
+  // useEffect(() => {
+  //   if (status === "authenticated") {
+  //     router.push("/");
+  //   }
+  // }, [status, router]);
+  // const { inputs, onChangeText, handleSignInByUserAndPassword } = useLogin();
+  return (
+    <main className="flex justify-center items-center h-screen">
+      <Card className=" w-[400px]">
+        <CardHeader className="flex justify-center items-center">
+          <CardTitle className="font-semibold">VAESMS</CardTitle>
+          <CardDescription>
+          Utilize seu e-mail corporativo e senha para acessar a plataforma de forma segura.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="grid sm:grid-cols-1">
+        {/* <form className="space-y-4" onSubmit={handleSignInByUserAndPassword}> */}
+          <form className="space-y-4" >
+            <div>
+              <Label htmlFor="email">Email</Label>
+              <Input
+                required
+                id="email"
+                placeholder="email@mail.com"
+                type="email"
+                name="email"
+               
+              />
+              {/* <Input
+                required
+                id="email"
+                placeholder="email@mail.com"
+                type="email"
+                name="email"
+                value={inputs.email}
+                onChange={(e) => onChangeText("email", e.target.value)}
+              /> */}
+            </div>
+
+            <div>
+              <Label htmlFor="password">password</Label>
+              <Input
+                id="password"
+                placeholder="**********"
+                type="password"
+                name="password"
+                required
+                
+              />
+               {/* <Input
+                id="password"
+                placeholder="**********"
+                type="password"
+                name="password"
+                required
+                value={inputs.password}
+                onChange={(e) => onChangeText("password", e.target.value)}
+              /> */}
+            </div>
+
+            <Link href="/contactmgmt" ><Button>Login</Button></Link>
+          </form>
+        </CardContent>
+
+        <CardFooter></CardFooter>
+      </Card>
+    </main>
+  );
 }

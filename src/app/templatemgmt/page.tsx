@@ -1,127 +1,154 @@
 "use client";
-import Link from 'next/link';
-import { useState } from 'react';
+import { useState } from "react";
+import { Card, CardHeader, CardTitle, CardContent, CardFooter } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import Link from "next/link"
+import Logo from "@/lib/media/logo.svg";
+import Image from "next/image";
 
-export default function Templates() {
-  const [templates, setTemplates] = useState([
-    { id: 1, name: "Welcome Message", content: "Hello {name}, welcome to our service!" },
-    { id: 2, name: "Weekly Update", content: "Hi {name}, here is your weekly update!" },
-    { id: 3, name: "Reminder", content: "Don't forget about our meeting on {date}." }
+export default function Component() {
+  const [modelos, setModelos] = useState([
+    { id: 1, nome: "Mensagem de Boas-Vindas", conteudo: "Olá {nome}, bem-vindo(a) à nossa plataforma." },
+    { id: 2, nome: "Atualização Semanal", conteudo: "Olá {nome}. Aqui está a atualização semanal para você." },
+    { id: 3, nome: "Lembrete", conteudo: "Olá {nome}. Não se esqueça de {acao} em {data}." },
   ]);
-  const [newTemplateName, setNewTemplateName] = useState("");
-  const [newTemplateContent, setNewTemplateContent] = useState("");
-  const [editTemplate, setEditTemplate] = useState(null);
 
-  // Handle adding a new template
-  const handleAddTemplate = () => {
-    if (newTemplateName && newTemplateContent) {
-      setTemplates([
-        ...templates,
+  const [novoNomeModelo, setNovoNomeModelo] = useState("");
+  const [novoConteudoModelo, setNovoConteudoModelo] = useState("");
+  const [editarModelo, setEditarModelo] = useState<number | null>(null);
+
+  const handleAddModelo = () => {
+    if (novoNomeModelo && novoConteudoModelo) {
+      setModelos([
+        ...modelos,
         {
-          id: templates.length + 1,
-          name: newTemplateName,
-          content: newTemplateContent
-        }
+          id: modelos.length + 1,
+          nome: novoNomeModelo,
+          conteudo: novoConteudoModelo,
+        },
       ]);
-      setNewTemplateName("");
-      setNewTemplateContent("");
+      setNovoNomeModelo("");
+      setNovoConteudoModelo("");
     }
   };
 
-  // Handle saving an edited template
-  const handleSaveEdit = () => {
-    // setTemplates(templates.map(template => 
-    //   template.id === editTemplate.id 
-    //     ? { ...editTemplate, name: newTemplateName, content: newTemplateContent } 
-    //     : template
-    // ));
-    setEditTemplate(null);
-    setNewTemplateName("");
-    setNewTemplateContent("");
+  const handleEditModelo = (id: number) => {
+    const modelo = modelos.find((m) => m.id === id);
+    if (modelo) {
+      setNovoNomeModelo(modelo.nome);
+      setNovoConteudoModelo(modelo.conteudo);
+      setEditarModelo(id);
+    }
   };
 
-  // Handle selecting a template to edit
-  // const handleEdit = (template) => {
-  //   setEditTemplate(template);
-  //   setNewTemplateName(template.name);
-  //   setNewTemplateContent(template.content);
-  // };
+  const handleSaveEdit = () => {
+    if (editarModelo !== null && novoNomeModelo && novoConteudoModelo) {
+      setModelos(
+        modelos.map((modelo) =>
+          modelo.id === editarModelo
+            ? { ...modelo, nome: novoNomeModelo, conteudo: novoConteudoModelo }
+            : modelo
+        )
+      );
+      setNovoNomeModelo("");
+      setNovoConteudoModelo("");
+      setEditarModelo(null);
+    }
+  };
 
-  // Handle deleting a template
-
-
-  // const handleDelete = (id) => {
-  //   // setTemplates(templates.filter(template => template.id !== id));
-  // };
+  const handleDeleteModelo = (id: number) => {
+    setModelos(modelos.filter((modelo) => modelo.id !== id));
+  };
 
   return (
-    <div className="container mx-auto p-4">
-      <h1 className="text-2xl font-bold mb-6">Manage Message Templates</h1>
-      
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {/* Templates List */}
-        <div className="bg-white p-6 rounded-lg shadow-md">
-          <h2 className="text-xl font-semibold mb-4">Existing Templates</h2>
-          <ul className="space-y-2">
-            {templates.map(template => (
-              <li key={template.id} className="flex justify-between items-center p-3 bg-gray-100 rounded-md">
-                <div>
-                  <h3 className="font-medium">{template.name}</h3>
-                  <p className="text-sm text-gray-600">{template.content}</p>
-                </div>
-                <div className="space-x-2">
-                  <button
-                    className="px-4 py-2 text-white bg-yellow-500 rounded-md hover:bg-yellow-600"
-                    // onClick={() => handleEdit(template)}
+    <div className="flex flex-col h-full">
+      <div className="flex-1 p-6 space-y-6">
+        <div>
+          <h2 className="text-3xl font-bold">Modelos Existentes</h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mt-6">
+            {modelos.map((modelo) => (
+              <Card key={modelo.id} className="shadow-lg rounded-lg">
+                <CardHeader>
+                  <CardTitle className="text-lg font-medium">{modelo.nome}</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p>{modelo.conteudo}</p>
+                </CardContent>
+                <CardFooter className="flex justify-end gap-2">
+                  <Button
+                   
+                    className=" text-white"
+                    onClick={() => handleEditModelo(modelo.id)}
                   >
-                    Edit
-                  </button>
-                  <button
-                    className="px-4 py-2 text-white bg-red-600 rounded-md hover:bg-red-700"
-                    // onClick={() => handleDelete(template.id)}
+                    Editar
+                  </Button>
+                  <Button
+                 
+                    className=" text-white"
+                    onClick={() => handleDeleteModelo(modelo.id)}
                   >
-                    Delete
-                  </button>
-                </div>
-              </li>
+                    Excluir
+                  </Button>
+                </CardFooter>
+              </Card>
             ))}
-          </ul>
-        </div>
-
-        {/* Add or Edit Template */}
-        <div className="bg-white p-6 rounded-lg shadow-md">
-          <h2 className="text-xl font-semibold mb-4">{editTemplate ? "Edit Template" : "Add New Template"}</h2>
-          <div className="space-y-4">
-            <div>
-              <label className="block mb-2 font-medium text-gray-700">Template Name</label>
-              <input
-                type="text"
-                className="block w-full px-4 py-2 border border-gray-300 rounded-md"
-                value={newTemplateName}
-                onChange={(e) => setNewTemplateName(e.target.value)}
-              />
-            </div>
-            <div>
-              <label className="block mb-2 font-medium text-gray-700">Template Content</label>
-              <textarea
-                className="block w-full h-32 px-4 py-2 border border-gray-300 rounded-md"
-                value={newTemplateContent}
-                onChange={(e) => setNewTemplateContent(e.target.value)}
-                placeholder="Enter your message template. Use {name} or other placeholders."
-              ></textarea>
-            </div>
-            <div>
-              <Link href="/broadcastmgmt">
-              <button
-                className="w-full px-4 py-2 text-white bg-blue-600 rounded-md hover:bg-blue-700"
-                onClick={editTemplate ? handleSaveEdit : handleAddTemplate}
-              >
-                {editTemplate ? "Save Changes" : "Add Template"}
-              </button>
-              </Link>
-            </div>
           </div>
         </div>
+        <div className="bg-white p-8 rounded-lg shadow-lg space-y-6">
+  <h2 className="text-3xl font-bold text-gray-800">
+    {editarModelo ? "Editar Modelo" : "Adicionar Novo Modelo"}
+  </h2>
+  <form
+    className="space-y-6"
+    onSubmit={(e) => {
+      e.preventDefault();
+      editarModelo !== null ? handleSaveEdit() : handleAddModelo();
+    }}
+  >
+    <div className="relative">
+      <Label
+        htmlFor="title"
+        className="absolute -top-3 left-2 bg-white px-2 text-sm font-semibold text-gray-600"
+      >
+        Título
+      </Label>
+      <Input
+        id="title"
+        placeholder="Título da mensagem"
+        className="border-gray-300 border-2 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+        value={novoNomeModelo}
+        onChange={(e) => setNovoNomeModelo(e.target.value)}
+      />
+    </div>
+    <div className="relative">
+      <Label
+        htmlFor="content"
+        className="absolute -top-3 left-2 bg-white px-2 text-sm font-semibold text-gray-600"
+      >
+        Conteúdo
+      </Label>
+      <Textarea
+        id="content"
+        placeholder="Conteúdo da mensagem"
+        className="border-gray-300 border-2 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+        value={novoConteudoModelo}
+        onChange={(e) => setNovoConteudoModelo(e.target.value)}
+      />
+    </div>
+    <Button
+    
+      className=" text-white px-6 py-3 rounded-lg text-lg font-medium shadow-md transform transition-transform hover:scale-105"
+      type="submit"
+    >
+      {editarModelo ? "Salvar Alterações" : "Adicionar"}
+    </Button>
+
+  </form>
+</div>
+
       </div>
     </div>
   );

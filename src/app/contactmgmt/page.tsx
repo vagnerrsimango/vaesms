@@ -1,73 +1,193 @@
+"use client";
+
+import React, { useState, useEffect } from "react";
+import Papa from "papaparse";
+import * as XLSX from 'xlsx';
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
+import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@/components/ui/table";
+import { Badge } from "@/components/ui/badge";
 import Link from "next/link";
 
-// pages/contacts.js
-export default function Contacts() {
+type Contact = {
+  id: number;
+  name: string;
+  phone: string;
+  email: string;
+  sector: string;
+};
+
+type Sector = {
+  id: number;
+  name: string;
+  count: number;
+};
+
+export default function Contactos() {
+  const [contacts, setContacts] = useState<Contact[]>([]);
+  const [filteredSector, setFilteredSector] = useState<string>("");
+  const [sectors, setSectors] = useState<Sector[]>([]);
+  const [newSectorName, setNewSectorName] = useState<string>("");
+
+  useEffect(() => {
+    // Update sector counts whenever contacts change
+    const sectorCounts = contacts.reduce((acc: Record<string, number>, contact) => {
+      const sector = contact.sector || "Sem Setor";
+      acc[sector] = (acc[sector] || 0) + 1;
+      return acc;
+    }, {});
+
+    const sectorList = Object.entries(sectorCounts).map(([name, count], index) => ({
+      id: index + 1,
+      name,
+      count
+    }));
+
+    setSectors([
+      { id: 0, name: "Todos", count: contacts.length }, // Card to show all contacts
+      ...sectorList
+    ]);
+  }, [contacts]);
+
+  const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+
+    if (file) {
+      Papa.parse(file, {
+        header: true,
+        skipEmptyLines: true,
+        complete: (results: Papa.ParseResult<any>) => {
+          const processedContacts: Contact[] = results.data.map((contact: any, index: number) => ({
+            id: index + 1,
+            name: `${contact["First Name"] || ""} ${contact["Middle Name"] || ""} ${contact["Last Name"] || ""}`.trim(),
+            email: contact["E-mail 1 - Value"] || "",
+            phone: contact["Phone 1 - Value"] || "",
+            sector: contact["Sector"] || "Sem Setor",
+          }));
+
+          setContacts(processedContacts);
+        },
+      });
+    }
+  };
+
+  const handleExport = () => {
+    const ws = XLSX.utils.json_to_sheet(contacts);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "Sheet1");
+    XLSX.writeFile(wb, "exported_contacts.csv");
+  };
+
+  const handleSectorClick = (sector: string) => {
+    setFilteredSector(sector === "Todos" ? "" : sector);
+  };
+
+  const handleAddSector = () => {
+    if (newSectorName.trim()) {
+      setSectors(prevSectors => {
+        const sectorExists = prevSectors.some(sector => sector.name === newSectorName);
+        if (!sectorExists) {
+          return [
+            ...prevSectors,
+            {
+              id: prevSectors.length + 1,
+              name: newSectorName,
+              count: 0
+            }
+          ];
+        }
+        return prevSectors;
+      });
+      setNewSectorName("");
+    }
+  };
+
+  const filteredContacts = filteredSector
+    ? contacts.filter((contact) => contact.sector.toLowerCase() === filteredSector.toLowerCase() || (filteredSector === "Sem Setor" && contact.sector === "Sem Setor"))
+    : contacts;
+
   return (
-    <div className="container mx-auto p-4">
-      <h1 className="text-2xl font-bold mb-6">Contact Management</h1>
-      
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {/* Import Contacts Section */}
-        <div className="bg-white p-6 rounded-lg shadow-md">
-          <h2 className="text-xl font-semibold mb-4">Import Contacts</h2>
-          <div className="space-y-4">
-            <button className="w-full px-4 py-2 text-white bg-blue-600 rounded-md hover:bg-blue-700">Upload CSV</button>
-            <button className="w-full px-4 py-2 text-white bg-green-600 rounded-md hover:bg-green-700">Import from Google Contacts</button>
+    <div className="flex flex-col h-full w-full bg-background text-foreground">
+      <main className="flex-1 grid grid-cols-[1fr_2fr] gap-6 p-6">
+        <section className="flex flex-col items-center justify-center gap-4">
+          <div className="mb-4 flex items-center justify-between w-full max-w-4xl">
+            <div className="flex gap-4">
+              <input
+                type="file"
+                accept=".csv"
+                onChange={handleFileUpload}
+                className="p-2 border border-gray-300 rounded cursor-pointer"
+              />
+            </div>
           </div>
-        </div>
-        
-        {/* Contact Groups Section */}
-        <div className="bg-white p-6 rounded-lg shadow-md">
-          <h2 className="text-xl font-semibold mb-4">Contact Groups</h2>
-          <ul className="space-y-2">
-            <li className="flex justify-between p-3 bg-gray-100 rounded-md">
-              <span>Family</span>
-              <span className="text-gray-500">5 Contacts</span>
-            </li>
-            <li className="flex justify-between p-3 bg-gray-100 rounded-md">
-              <span>Clients</span>
-              <span className="text-gray-500">20 Contacts</span>
-            </li>
-            <li className="flex justify-between p-3 bg-gray-100 rounded-md">
-              <span>Team</span>
-              <span className="text-gray-500">10 Contacts</span>
-            </li>
-          </ul>
-          <Link href="/templatemgmt">
-          <button className="mt-4 w-full px-4 py-2 text-white bg-indigo-600 rounded-md hover:bg-indigo-700">Create New Group</button>
-          </Link>
-        </div>
-      </div>
-      
-      {/* Contact Details Section */}
-      <div className="mt-6 bg-white p-6 rounded-lg shadow-md">
-        <h2 className="text-xl font-semibold mb-4">Contact Details</h2>
-        <table className="w-full text-left table-auto">
-          <thead>
-            <tr className="bg-gray-200">
-              <th className="px-4 py-2">Name</th>
-              <th className="px-4 py-2">Phone</th>
-              <th className="px-4 py-2">Email</th>
-              <th className="px-4 py-2">Custom Fields</th>
-            </tr>
-          </thead>
-          <tbody>
-            {/* Dummy data for demonstration */}
-            <tr>
-              <td className="border px-4 py-2">John Doe</td>
-              <td className="border px-4 py-2">+1234567890</td>
-              <td className="border px-4 py-2">john@example.com</td>
-              <td className="border px-4 py-2">VIP</td>
-            </tr>
-            <tr>
-              <td className="border px-4 py-2">Jane Smith</td>
-              <td className="border px-4 py-2">+0987654321</td>
-              <td className="border px-4 py-2">jane@example.com</td>
-              <td className="border px-4 py-2">Priority</td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
+        </section>
+
+        <section>
+          <div className="mb-4 flex items-center justify-between">
+            <h2 className="text-xl font-bold">Sectores de Contactos</h2>
+            <div className="flex gap-4">
+             
+              <input
+                type="text"
+                placeholder="Novo setor..."
+                value={newSectorName}
+                onChange={(e) => setNewSectorName(e.target.value)}
+                className="p-2 border border-gray-300 rounded"
+              />
+              <Button variant="outline" onClick={handleAddSector}>Adicionar</Button>
+            </div>
+          </div>
+          <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
+            {sectors.map((sector) => (
+              <Card
+                key={sector.id}
+                className="flex flex-col items-center justify-center gap-2 p-4 cursor-pointer"
+                onClick={() => handleSectorClick(sector.name)}
+              >
+                <div className="text-4xl font-bold">{sector.count}</div>
+                <p className="text-muted-foreground">{sector.name}</p>
+              </Card>
+            ))}
+          </div>
+        </section>
+
+        <section className="col-span-2">
+          <div className="mb-4 flex items-center justify-between">
+            <h2 className="text-xl font-bold">Detalhes de Contactos</h2>
+            <Button variant="outline" onClick={handleExport}>Exportar para CSV</Button>
+          </div>
+          <Card>
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Nome</TableHead>
+                  <TableHead>Telefone</TableHead>
+                  <TableHead>Email</TableHead>
+                  <TableHead>Sector</TableHead>
+                  <TableHead>Ações</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {filteredContacts.map((contact) => (
+                  <TableRow key={contact.id}>
+                    <TableCell>{contact.name}</TableCell>
+                    <TableCell>{contact.phone}</TableCell>
+                    <TableCell>{contact.email}</TableCell>
+                    <TableCell>
+                      <Badge variant={contact.sector === "VIP" ? "secondary" : "outline"}>
+                        {contact.sector}
+                      </Badge>
+                    </TableCell>
+                    <TableCell>
+                      <Button variant="ghost" size="icon">Edit</Button>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </Card>
+        </section>
+      </main>
     </div>
   );
 }
