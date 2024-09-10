@@ -32,7 +32,7 @@ export default function AuthPage() {
     <main className="flex justify-center items-center h-screen">
       <Card className=" w-[400px]">
         <CardHeader className="flex justify-center items-center">
-          <CardTitle className="font-semibold">VAESMS</CardTitle>
+          <CardTitle className="font-semibold">VAE SMS</CardTitle>
           <CardDescription>
           Utilize seu e-mail corporativo e senha para acessar a plataforma de forma segura.
           </CardDescription>

@@ -6,7 +6,7 @@
 export default function Component() {
   return (
     <div className="flex items-center justify-center min-h-screen bg-background">
-      <h1 className="text-6xl font-bold text-primary">Analytics</h1>
+      <h1 className="text-6xl font-bold text-primary">Enviado com sucesso!</h1>
     </div>
   )
 }

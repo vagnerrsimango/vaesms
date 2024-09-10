@@ -8,7 +8,7 @@ interface Contact {
   Name: string;
   Email: string;
   Phone: string;
-  Status?: string; // Changed from Area to Status
+  Status?: string;
 }
 
 export default function HelloWorld() {

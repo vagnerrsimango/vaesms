@@ -1,47 +1,40 @@
-// pages/api/contacts/[action].js
+// src/api/contacts/action.tsx
 
-import { PrismaClient } from '@prisma/client'
-import { parse } from 'querystring'
-import { stringify } from 'querystring'
+import { PrismaClient } from "@prisma/client";
+const prisma = new PrismaClient();
 
-const prisma = new PrismaClient()
+export type Contact = {
+  id: number;
+  name: string;
+  phone: string;
+  email: string;
+  sector: string | null;  // Change this depending on how you store sector data
+};
 
-export default async function handler(req, res) {
-  const { action } = req.query;
+// Fetch Contacts including their sector relationship
+export async function getContacts() {
+  const contacts = await prisma.contact.findMany({
+    include: {
+      sector: true, // Assuming 'sector' is a relation (from `sectorId`)
+    },
+  });
 
-  if (action === 'import') {
-    try {
-      const data = [];
-      req.on('data', async (chunk) => {
-        await new Promise((resolve) => {
-          parse(chunk)
-            .on('data', (row) => data.push(row))
-            .on('end', resolve);
-        });
-      });
+  // Map database result to match the Contact type used in the front-end
+  const transformedContacts = contacts.map((contact) => ({
+    id: contact.id,
+    name: contact.name,
+    phone: contact.phone,
+    email: contact.email,
+    sector: contact.sector?.name || "No Sector",  // Assuming sector has a name field
+  }));
 
-      req.on('end', async () => {
-        await prisma.contact.createMany({
-          data: data,
-        });
-        res.status(200).json({ message: 'Contacts imported successfully' });
-      });
-    } catch (error) {
-      console.error(error);
-      res.status(500).json({ message: 'Error importing contacts' });
-    }
-  } else if (action === 'export') {
-    try {
-      const contacts = await prisma.contact.findMany();
-      const csv = stringify(contacts, { header: true });
-      res.setHeader('Content-Type', 'text/csv');
-      res.setHeader('Content-Disposition', 'attachment; filename=contacts.csv');
-      res.send(csv);
-    } catch (error) {
-      console.error(error);
-      res.status(500).json({ message: 'Error exporting contacts' });
-    }
-  } else {
-    res.status(400).json({ message: 'Invalid action' });
-  }
+  return transformedContacts;
+}
+
+export async function addContacts(contactsData: any[]) {
+  const contacts = await prisma.contact.createMany({
+    data: contactsData,
+    skipDuplicates: true, // Avoid duplicate records
+  });
+  return contacts;
 }

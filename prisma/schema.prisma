@@ -9,14 +9,21 @@ generator client {
 }
 
 datasource db {
-  provider = "sqlite"
+  provider = "mysql"
   url      = env("DATABASE_URL")
 }
 
 model Contact {
-  id        Int      @id
-  firstName String
-  lastName  String
-  email     String
-  phone     String
+  id      Int      @id @default(autoincrement())
+  name    String
+  phone   String
+  email   String
+  sector  Sector?  @relation(fields: [sectorId], references: [id])
+  sectorId Int?
+}
+
+model Sector {
+  id       Int       @id @default(autoincrement())
+  name     String    @unique
+  contacts Contact[]
 }

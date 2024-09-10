@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { Toaster } from "@/components/ui/toaster"
 
 import "./globals.css";
 import { Outfit, Nunito_Sans } from "next/font/google";
@@ -12,7 +13,7 @@ const outfit = Outfit({
 const nunito = Nunito_Sans({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "VAESMS",
+  title: "VAE SMS",
   description: "Sistema de envio de mensagens pertencente à VAE-IO",
 };
 
@@ -28,6 +29,7 @@ export default function RootLayout({
         <Navbar />
       </header>
       {children}
+      <Toaster />
     </body>
   </html>
   
